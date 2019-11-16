@@ -12,14 +12,14 @@ class Tree
 {
 private:
 	node *root;
-	void insert(int *, std::string, node *,int);
+	void insert(std::vector<int *>, std::string, node *);
 	node *search(std::string, node *);
 
 public:
 	Tree();
 	virtual ~Tree();
 
-	void insert(int *, std::string);
+	void insert(std::vector<int *>, std::string);
 	node *search(std::string);
 	//wyœwietlanie drzewa?
 };

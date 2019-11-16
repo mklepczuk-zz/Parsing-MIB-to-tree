@@ -11,13 +11,14 @@ Tree::~Tree()
 {
 }
 
-void Tree::insert(int *keys, std::string name)
+void Tree::insert(std::vector<int> keys, std::string name)
 {
 	if(root != nullptr){
-		insert(keys, name, root, sizeof(keys));
+		keys.erase(keys.begin());
+		insert(keys, name, root);
 	}else{
 		root = new node;
-		root->mib = keys[0];
+		root->mib = keys.front();
 		root->name = name;
 	}
 }
@@ -27,11 +28,11 @@ node * Tree::search(std::string)
 	return nullptr;
 }
 
-void Tree::insert(int *keys, std::string name, node *leaf, int size)
+void Tree::insert(std::vector<int> keys, std::string name, node *leaf)
 {
-	if(leaf->children.empty() == true){
+	if(keys.size() == 1){
 		leaf->children.push_back(new node);
-		leaf->children.back()->mib = keys[];
+		leaf->children.back()->mib = keys.front();
 		leaf->children.back()->name = name;
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
-#include<string>
+#include <string>
+#include <algorithm>
 
 struct node{
 	std::vector<node *> children;
@@ -12,14 +13,14 @@ class Tree
 {
 private:
 	node *root;
-	void insert(std::vector<int *>, std::string, node *);
+	void insert(std::vector<int>, std::string, node *);
 	node *search(std::string, node *);
 
 public:
 	Tree();
 	virtual ~Tree();
 
-	void insert(std::vector<int *>, std::string);
+	void insert(std::vector<int>, std::string);
 	node *search(std::string);
 	//wyœwietlanie drzewa?
 };

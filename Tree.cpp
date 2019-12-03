@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Tree.h"
+#define COUNT 7
 
 Tree::Tree()
 {
@@ -22,6 +23,11 @@ void Tree::insert(std::vector<int> keys, std::string name)
 	}
 }
 
+void Tree::show()
+{
+	show(root,0);
+}
+
 node * Tree::search(std::string)
 {
 	return nullptr;
@@ -29,7 +35,7 @@ node * Tree::search(std::string)
 
 void Tree::insert(std::vector<int> keys, std::string name, node *leaf)
 {
-	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = keys](node * const& obj){
+	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = keys](node * obj){
 		return obj->mib == mib.front(); } );
 
 	if ( iter != leaf->children.end() ){
@@ -40,12 +46,29 @@ void Tree::insert(std::vector<int> keys, std::string name, node *leaf)
 
 	} else {
 
-		if(keys.size() == 1){
-			leaf->children.push_back(new node);
-			leaf->children.back()->mib = keys.front();
-			leaf->children.back()->name = name;
-		}
+		leaf->children.push_back(new node);
+		leaf->children.back()->mib = keys.front();
+		leaf->children.back()->name = name;
 	}
+}
+
+void Tree::show(node * leaf, int space)
+{
+	if (leaf->children.front() == nullptr)  
+        return;
+
+	// Increase distance between levels
+    space += COUNT;
+  
+    // Print current node after space
+	for (std::vector<node *>::iterator it = leaf->children.begin() ; it != leaf->children.end(); it++)
+	{
+		std::cout<<std::endl;
+		for (int i = COUNT; i < space; i++)  
+			std::cout<<" ";
+		std::cout<<leaf->mib<<leaf->name<<"\n";
+	}
+    
 }
 
 node * Tree::search(std::string, node *)

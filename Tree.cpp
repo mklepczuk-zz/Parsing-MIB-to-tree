@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "Tree.h"
-#define COUNT 7
+#define COUNT 5
 
 Tree::Tree()
 {
@@ -64,11 +64,11 @@ void Tree::show(node * leaf, int space)
 	for (std::vector<node *>::iterator it = leaf->children.begin() ; it != leaf->children.end(); it++)
 	{
 		std::cout<<std::endl;
-		for (int i = COUNT; i < space; i++)  
+		for (int i = COUNT; i < space; i++)
 			std::cout<<" ";
-		std::cout<<leaf->mib<<leaf->name<<"\n";
+		std::cout<<(*it)->mib<<(*it)->name<<"\n";
 	}
-    
+    return;
 }
 
 node * Tree::search(std::string, node *)

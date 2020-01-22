@@ -4,45 +4,45 @@
 
 Tree::Tree()
 {
-	root = nullptr;
+	root->mib = 1;
+	root->name = "ISO";
 }
 
 Tree::~Tree()
 {
 }
 
-void Tree::insert(std::vector<int> keys, std::string name)
+void Tree::Insert(std::vector<int> keys, std::string name)
 {
-	if(root != nullptr){
-		keys.erase(keys.begin());
-		insert(keys, name, root);
-	}else{
+	keys.erase(keys.begin());
+	Insert(keys, name, root);
+	/*else{				NIEPOTRZEBNE, BO W PLIKACH NIE MA DEFINICJI ROOT
 		root = new node;
 		root->mib = keys.front();
 		root->name = name;
-	}
+	}*/
 }
 
-void Tree::show()
+void Tree::Show()
 {
-	show(root,0);
+	Show(root,0);
 }
 
-node * Tree::search(std::string)
+node * Tree::Search(std::string)
 {
 	return nullptr;
 }
 
-void Tree::insert(std::vector<int> keys, std::string name, node *leaf)
+void Tree::Insert(std::vector<int> keys, std::string name, node *leaf)
 {
 	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = keys](node * obj){
 		return obj->mib == mib.front(); } );
 
 	if ( iter != leaf->children.end() ){
 
-		int index = std::distance(leaf->children.begin(),iter);
+		auto index = std::distance(leaf->children.begin(),iter);
 		keys.erase(keys.begin());
-		insert(keys, name, leaf->children.at(index));
+		Insert(keys, name, leaf->children.at(index));
 
 	} else {
 
@@ -52,7 +52,7 @@ void Tree::insert(std::vector<int> keys, std::string name, node *leaf)
 	}
 }
 
-void Tree::show(node * leaf, int space)
+void Tree::Show(node * leaf, int space)
 {
 	if (leaf->children.front() == nullptr)  
         return;
@@ -71,7 +71,7 @@ void Tree::show(node * leaf, int space)
     return;
 }
 
-node * Tree::search(std::string, node *)
+node * Tree::Search(std::string, node *)
 {
 	return nullptr;
 }

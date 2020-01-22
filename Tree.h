@@ -16,16 +16,16 @@ class Tree
 {
 private:
 	node *root;
-	void insert(std::vector<int>, std::string, node *);
-	node *search(std::string, node *);
-	void show(node *, int);
+	void Insert(std::vector<int>, std::string, node *);
+	node *Search(std::string, node *);
+	void Show(node *, int);
 
 public:
 	Tree();
 	virtual ~Tree();
 
-	void insert(std::vector<int>, std::string);
-	node *search(std::string);
-	void show();
+	void Insert(std::vector<int>, std::string);
+	node *Search(std::string);
+	void Show();
 };
 

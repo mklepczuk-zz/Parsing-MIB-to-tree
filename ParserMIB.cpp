@@ -12,24 +12,39 @@ ParserMIB::~ParserMIB()
 
 void ParserMIB::ParseMib()
 {
-	LoadFile();
+	std::string loadedFile = LoadFile("../RFC1213-MIB.txt");
+	ParseImports(loadedFile);
 }
 
-std::string ParserMIB::GetFile()
+std::string ParserMIB::LoadFile(std::string path)
 {
-	return ParserMIB::importedFile;
-}
-
-void ParserMIB::LoadFile()
-{
-	std::ifstream in("../RFC1213-MIB.txt", std::ios::in | std::ios::binary);
+	std::string temp;
+	std::ifstream in(path, std::ios::in | std::ios::binary);
 	if (in)
 	{
-		ParserMIB::importedFile = std::string((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
+		temp = std::string((std::istreambuf_iterator<char>(in)), std::istreambuf_iterator<char>());
 	}
 	else
 	{
-		ParserMIB::importedFile = std::string(NULL);
+		temp = std::string(NULL);
 	}
+	return temp;
+}
 
+void ParserMIB::ParseImports(std::string import)
+{
+	std::regex re("IMPORTS\\s*(.*)\\s*FROM\\s*(.*)");
+	std::sregex_iterator next(import.begin(), import.end(), re);
+	std::sregex_iterator end;
+	while (next != end)
+	{
+		std::smatch match = *next;
+		next++;
+		if(match.str(2).size() > 0)
+		{
+			std::string importedfile = LoadFile("../" + match.str(2) + ".txt");
+			// parse datatype
+			// parse OID
+		}
+	}
 }

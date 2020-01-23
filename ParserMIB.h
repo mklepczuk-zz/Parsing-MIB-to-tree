@@ -7,14 +7,13 @@
 class ParserMIB
 {
 private:
-	std::string importedFile;
-	void LoadFile();
+	std::string LoadFile(std::string);
+	void ParseImports(std::string);
 
 public:
 	ParserMIB();
 	virtual ~ParserMIB();
 
-	void ParseMib() ;
-	std::string GetFile();
+	void ParseMib();
 };
 

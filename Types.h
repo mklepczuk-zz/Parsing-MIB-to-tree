@@ -15,8 +15,10 @@ struct datatypes{
 class Types
 {
 private:
+	datatypes *typesList;
 
 public:
 	Types();
 	virtual ~Types();
+	datatypes *GetList();
 };

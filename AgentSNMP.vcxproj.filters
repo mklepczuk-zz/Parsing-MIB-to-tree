@@ -30,9 +30,6 @@
     <ClInclude Include="GetTypeInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TreeAccess.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ParserMIB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -51,9 +48,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GetTypeInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="TreeAccess.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ParserMIB.cpp">

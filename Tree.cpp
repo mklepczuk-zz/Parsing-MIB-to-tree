@@ -5,7 +5,7 @@
 Tree::Tree()
 {
 	root->mib = 1;
-	root->name = "ISO";
+	root->name = "iso";
 }
 
 Tree::~Tree()
@@ -35,8 +35,8 @@ node * Tree::Search(std::string)
 
 void Tree::Insert(std::vector<int> keys, std::string name, node *leaf)
 {
-	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = keys](node * obj){
-		return obj->mib == mib.front(); } );
+	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = keys](node * obj)
+	{ return obj->mib == mib.front();} );
 
 	if ( iter != leaf->children.end() ){
 

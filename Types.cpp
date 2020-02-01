@@ -3,14 +3,19 @@
 
 Types::Types()
 {
-	typesList = nullptr;
+	list = new std::vector<datatypes *>;
 }
 
 Types::~Types()
 {
 }
 
-datatypes *Types::GetList()
+std::vector<datatypes *> *Types::GetList()
 {
-	return typesList;
+	return list;
 }
+
+/*std::vector<datatypes *>::iterator iter = std::find_if(listoftypes->begin(), listoftypes->end(),[type = name](datatypes * obj)
+		{ return obj->name == type;} );
+
+		if ( iter == listoftypes->end() )*/

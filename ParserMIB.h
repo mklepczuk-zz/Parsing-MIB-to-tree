@@ -9,13 +9,13 @@ class ParserMIB
 {
 private:
 	std::string LoadFile(std::string);
-	void ParseImports(std::string, datatypes *);
-	void ParseDataTypes(std::string, datatypes *);
+	void ParseImports(std::string, std::vector<datatypes *> *);
+	void ParseDataTypes(std::string, std::vector<datatypes *> *,std::string);
 
 public:
 	ParserMIB();
 	virtual ~ParserMIB();
 
-	void ParseMib(datatypes *);
+	void ParseMib(std::vector<datatypes *> *);
 };
 

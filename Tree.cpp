@@ -1,77 +1,128 @@
 #include "stdafx.h"
 #include "Tree.h"
-#define COUNT 5
 
 Tree::Tree()
 {
-	root->mib = 1;
-	root->name = "iso";
+	root = new node(std::vector<node *>(),1,"iso",nullptr);
 }
 
 Tree::~Tree()
 {
 }
 
-void Tree::Insert(std::vector<int> keys, std::string name)
+void Tree::Insert(int key, std::string parent_name, std::string child_name, datatypes *type)
 {
-	keys.erase(keys.begin());
-	Insert(keys, name, root);
-	/*else{				NIEPOTRZEBNE, BO W PLIKACH NIE MA DEFINICJI ROOT
-		root = new node;
-		root->mib = keys.front();
-		root->name = name;
-	}*/
+	//keys.erase(keys.begin());
+	Insert(key, parent_name, child_name, type, root);
 }
 
 void Tree::Show()
 {
-	Show(root,0);
+	Show(root);
 }
 
-node * Tree::Search(std::string)
+node *Tree::GetFound()
 {
-	return nullptr;
+	return found;
 }
 
-void Tree::Insert(std::vector<int> keys, std::string name, node *leaf)
+void Tree::SearchName(std::string name)
 {
-	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = keys](node * obj)
+	return SearchName(name,root);
+}
+
+void Tree::Insert(int key, std::string parent_name, std::string child_name, datatypes *type, node *leaf)
+{
+	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = parent_name](node * obj)
+	{ return obj->name == mib;} );
+
+	if ( iter != leaf->children.end() )
+	{
+		auto index = std::distance(leaf->children.begin(),iter);
+		leaf->children.at(index)->children.push_back(new node(std::vector<node *>(),key,child_name,type));
+		return;
+	} 
+	else if (leaf->children.size() > 0)
+	{
+		for (size_t index = 0; index < leaf->children.size(); index++)
+		{
+			Insert(key, parent_name, child_name, type, leaf->children.at(index));
+		}
+	}
+	else if (leaf->name == parent_name)
+	{
+		leaf->children.push_back(new node(std::vector<node *>(),key,child_name,type));
+	}
+}
+
+void Tree::Show(node * leaf)
+{
+	std::cout<<leaf->mib<<" "<<leaf->name<<"\n";
+	if (leaf->children.size() > 0)
+	{
+		std::cout<<"\n";
+		for(std::vector<node *>::iterator it = leaf->children.begin() ; it != leaf->children.end(); it++)
+		{
+			auto index = std::distance(leaf->children.begin(),it);
+			Show(leaf->children.at(index));
+		}
+	}
+	else
+	{
+		return;
+	}
+}
+
+void Tree::SearchName(std::string name, node * leaf)
+{
+	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = name](node * obj)
+	{ return obj->name == mib;} );
+
+	if ( iter != leaf->children.end() )
+	{
+		auto index = std::distance(leaf->children.begin(),iter);
+		found = leaf->children.at(index);
+	} 
+	else if (leaf->children.size() > 0)
+	{
+		for (size_t index = 0; index < leaf->children.size(); index++)
+		{
+			SearchName(name, leaf->children.at(index));
+		}
+	}
+}
+
+//                   INSERT BY OID (1.3.6.3.2)
+/*std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = keys](node * obj)
 	{ return obj->mib == mib.front();} );
 
-	if ( iter != leaf->children.end() ){
-
+	if ( iter != leaf->children.end() )
+	{
 		auto index = std::distance(leaf->children.begin(),iter);
 		keys.erase(keys.begin());
 		Insert(keys, name, leaf->children.at(index));
 
-	} else {
-
+	} else 
+	{
 		leaf->children.push_back(new node);
 		leaf->children.back()->mib = keys.front();
 		leaf->children.back()->name = name;
 	}
-}
 
-void Tree::Show(node * leaf, int space)
-{
-	if (leaf->children.front() == nullptr)  
-        return;
-
-	// Increase distance between levels
-    space += COUNT;
-  
-    // Print current node after space
-	for (std::vector<node *>::iterator it = leaf->children.begin() ; it != leaf->children.end(); it++)
+//					INSERT DO DRZEWA poprzednia wersja
+	if ( iter != leaf->children.end() )
 	{
-		std::cout<<std::endl;
-		for (int i = COUNT; i < space; i++)
-			std::cout<<" ";
-		std::cout<<(*it)->mib<<(*it)->name<<"\n";
+		auto index = std::distance(leaf->children.begin(),iter);
+		Insert(key, parent_name, child_name, type, leaf->children.at(index));
+	} 
+	else if (leaf->children.size() > 0 && leaf->name != parent_name)
+	{
+		for (size_t index = 0; index < leaf->children.size(); index++)
+		{
+			Insert(key, parent_name, child_name, type, leaf->children.at(index));
+		}
 	}
-    return;
-}
-
-node * Tree::Search(std::string, node *)
-{
-	return nullptr;
-}
+	else if (leaf->name == parent_name)
+	{
+		leaf->children.push_back(new node(std::vector<node *>(),key,child_name,type));
+	}*/

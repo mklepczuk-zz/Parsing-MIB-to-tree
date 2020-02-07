@@ -10,11 +10,12 @@ ParserMIB::~ParserMIB()
 {
 }
 
-void ParserMIB::ParseMib(std::vector<datatypes *> *listoftypes)
+void ParserMIB::ParseMib(std::vector<datatypes *> *listoftypes, Tree *tree)
 {
 	std::string loadedFile = LoadFile("../RFC1213-MIB.txt");
-	ParseImports(loadedFile,listoftypes);
+	ParseImports(loadedFile,listoftypes,tree);
 	ParseDataTypes(loadedFile, listoftypes,"MIB");
+	ParseIdentifiers(loadedFile,"MIB",tree);
 }
 
 std::string ParserMIB::LoadFile(std::string path)
@@ -32,7 +33,7 @@ std::string ParserMIB::LoadFile(std::string path)
 	return temp;
 }
 
-void ParserMIB::ParseImports(std::string import,std::vector<datatypes *> *listoftypes)
+void ParserMIB::ParseImports(std::string import,std::vector<datatypes *> *listoftypes, Tree *tree)
 {
 	std::regex re("IMPORTS\\s*.*\\n.*\\n\\s*FROM\\s(.*)");
 	std::sregex_iterator next(import.begin(), import.end(), re);
@@ -40,7 +41,7 @@ void ParserMIB::ParseImports(std::string import,std::vector<datatypes *> *listof
 	std::smatch match = *next;
 	std::string importedfile = LoadFile("../" + match.str(1) + ".txt");
 	ParseDataTypes(importedfile, listoftypes,"import");
-	// parse OID
+	ParseIdentifiers(importedfile,"import", tree);
 }
 
 void ParserMIB::ParseDataTypes(std::string import,std::vector<datatypes *> *listoftypes,std::string file)
@@ -84,6 +85,50 @@ void ParserMIB::ParseDataTypes(std::string import,std::vector<datatypes *> *list
 			std::smatch match4 = *next4;
 			listoftypes->push_back(new datatypes(match4.str(1),"",4,"",match4.str(2),0,255));
 			next4++;
+		}
+	}
+}
+
+void ParserMIB::ParseIdentifiers(std::string import, std::string file, Tree *nTree)
+{
+	if(file == "import")
+	{
+		std::regex re("(\\w*)\\s*OBJECT IDENTIFIER ::= \\{ (\\w*) ((\\w*)\\((\\d*)\\) (\\w*)\\((\\d*)\\) )?(\\d*)");
+		std::sregex_iterator next(import.begin(), import.end(), re);
+		std::sregex_iterator end;
+		while (next != end)
+		{
+			std::smatch match = *next;
+			if(match[3].matched != false)
+			{
+				nTree->Insert(std::stoi(match.str(5)),match.str(2),match.str(4),nullptr);
+				nTree->Insert(std::stoi(match.str(7)),match.str(4),match.str(6),nullptr);
+				nTree->Insert(std::stoi(match.str(8)),match.str(6),match.str(1),nullptr);
+			}
+			else
+			{
+				nTree->Insert(std::stoi(match.str(8)),match.str(2),match.str(1),nullptr);
+			}
+			next++;
+		}
+	}
+	if(file == "MIB")
+	{
+		std::regex re2("(\\w*)(\\-\\w*)?\\s*OBJECT IDENTIFIER ::= \\{ (\\w*)(\\-\\w*)?\\s*(\\d*)");
+		std::sregex_iterator next2(import.begin(), import.end(), re2);
+		std::sregex_iterator end2;
+		while (next2 != end2)
+		{
+			std::smatch match2 = *next2;
+			if(match2[4].matched == false)
+			{
+				nTree->Insert(std::stoi(match2.str(5)),match2.str(3),(match2.str(1)+match2.str(2)),nullptr);
+			}
+			else
+			{
+				nTree->Insert(std::stoi(match2.str(5)),(match2.str(3)+match2.str(4)),match2.str(1),nullptr);
+			}
+			next2++;
 		}
 	}
 }

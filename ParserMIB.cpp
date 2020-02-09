@@ -16,6 +16,7 @@ void ParserMIB::ParseMib(std::vector<datatypes *> *listoftypes, Tree *tree)
 	ParseImports(loadedFile,listoftypes,tree);
 	ParseDataTypes(loadedFile, listoftypes,"MIB");
 	ParseIdentifiers(loadedFile,"MIB",tree);
+	ParseObjects(loadedFile, listoftypes, tree);
 }
 
 std::string ParserMIB::LoadFile(std::string path)
@@ -83,7 +84,7 @@ void ParserMIB::ParseDataTypes(std::string import,std::vector<datatypes *> *list
 		while (next4 != end4)
 		{
 			std::smatch match4 = *next4;
-			listoftypes->push_back(new datatypes(match4.str(1),"",4,"",match4.str(2),0,255));
+			listoftypes->push_back(new datatypes(match4.str(1),"CONTEXT-SPECIFIC",4,"UNIVERSAL",match4.str(2),0,255));
 			next4++;
 		}
 	}
@@ -101,13 +102,13 @@ void ParserMIB::ParseIdentifiers(std::string import, std::string file, Tree *nTr
 			std::smatch match = *next;
 			if(match[3].matched != false)
 			{
-				nTree->Insert(std::stoi(match.str(5)),match.str(2),match.str(4),nullptr);
-				nTree->Insert(std::stoi(match.str(7)),match.str(4),match.str(6),nullptr);
-				nTree->Insert(std::stoi(match.str(8)),match.str(6),match.str(1),nullptr);
+				nTree->Insert(std::stoi(match.str(5)),"","","",match.str(2),match.str(4),nullptr);
+				nTree->Insert(std::stoi(match.str(7)),"","","",match.str(4),match.str(6),nullptr);
+				nTree->Insert(std::stoi(match.str(8)),"","","",match.str(6),match.str(1),nullptr);
 			}
 			else
 			{
-				nTree->Insert(std::stoi(match.str(8)),match.str(2),match.str(1),nullptr);
+				nTree->Insert(std::stoi(match.str(8)),"","","",match.str(2),match.str(1),nullptr);
 			}
 			next++;
 		}
@@ -122,13 +123,83 @@ void ParserMIB::ParseIdentifiers(std::string import, std::string file, Tree *nTr
 			std::smatch match2 = *next2;
 			if(match2[4].matched == false)
 			{
-				nTree->Insert(std::stoi(match2.str(5)),match2.str(3),(match2.str(1)+match2.str(2)),nullptr);
+				nTree->Insert(std::stoi(match2.str(5)),"","","",match2.str(3),(match2.str(1)+match2.str(2)),nullptr);
 			}
 			else
 			{
-				nTree->Insert(std::stoi(match2.str(5)),(match2.str(3)+match2.str(4)),match2.str(1),nullptr);
+				nTree->Insert(std::stoi(match2.str(5)),"","","",(match2.str(3)+match2.str(4)),match2.str(1),nullptr);
 			}
 			next2++;
 		}
+	}
+}
+
+void ParserMIB::ParseObjects(std::string import, std::vector<datatypes*> *listoftypes, Tree *nTree)
+{
+	std::string s ="(\\w*) OBJECT-TYPE\\n.*SYNTAX  (SEQUENCE OF )?(\\w*\\s*\\w*)(\\{[^\\}]*\\})?( \\(SIZE \\(0\\.\\.255\\)\\))?( \\((\\d*)\\.\\.(\\d*)\\))?";
+	std::string s2 = "\\n.*ACCESS  (\\w*\\-\\w*)\\n.*STATUS  (\\w*)\\n.*DESCRIPTION\\n.*\"([^\"]*)\"\\n.*(\\n.*)?::= \\{ (\\w*) (\\d*)";
+	std::regex re(s+s2);
+	std::sregex_iterator next(import.begin(), import.end(), re);
+	std::sregex_iterator end;
+	while (next != end)
+	{
+		std::smatch match = *next;
+		if(match[4].matched != false) //INT O OKREŒLONYCH WARTOŒCIACH
+		{
+			std::regex re2("(\\d+)\\)[^\\,]");
+			std::sregex_iterator next2((match.str(4)).begin(), (match.str(4)).end(), re2);
+			std::smatch match2 = *next2;
+			std::vector<datatypes *>::iterator iter = std::find_if(listoftypes->begin(), listoftypes->end(),[type = (match.str(3)+match2.str(1))](datatypes * obj)
+			{ return obj->name == type;} );
+			if ( iter != listoftypes->end() )
+			{
+				auto index = std::distance(listoftypes->begin(),iter);
+				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->at(index));
+			}
+			else
+			{
+				listoftypes->push_back(new datatypes((match.str(3)+match2.str(1)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),1,std::stoul(match2.str(1))));
+				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->back());
+			}
+		}
+		else if(match[6].matched != false) //MNIEJSZE INT
+		{
+			std::vector<datatypes *>::iterator iter = std::find_if(listoftypes->begin(), listoftypes->end(),[type = (match.str(3)+match.str(8))](datatypes * obj)
+			{ return obj->name == type;} );
+			if ( iter != listoftypes->end() )
+			{
+				auto index = std::distance(listoftypes->begin(),iter);
+				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->at(index));
+			}
+			else
+			{
+				listoftypes->push_back(new datatypes((match.str(3)+match.str(8)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),std::stoi(match.str(7)),std::stoul(match.str(8))));
+				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->back());
+			}
+		}
+		else if(match[2].matched != false)  //SEKWENCJE
+		{
+			listoftypes->push_back(new datatypes((match.str(3)+match.str(8)),"",2,"",match.str(3),std::stoi(match.str(7)),std::stoul(match.str(8))));
+			nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->back());
+		}
+		else
+		{
+			std::vector<datatypes *>::iterator iter = std::find_if(listoftypes->begin(), listoftypes->end(),[type = match.str(3)](datatypes * obj)
+			{ return obj->name == type;} );
+			if ( iter != listoftypes->end() )
+			{
+				auto index = std::distance(listoftypes->begin(),iter);
+				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->at(index));
+			}
+			else
+			{
+				if(match.str(3) == "OBJECT IDENTIFIER")
+					listoftypes->push_back(new datatypes((match.str(3)),"CONTEXT-SPECIFIC",6,"UNIVERSAL",match.str(3),0,255));
+				else
+					listoftypes->push_back(new datatypes((match.str(3)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),(-2147483647-1),2147483647));
+				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->back());
+			}
+		}
+		next++;
 	}
 }

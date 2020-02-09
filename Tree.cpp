@@ -3,17 +3,16 @@
 
 Tree::Tree()
 {
-	root = new node(std::vector<node *>(),1,"iso",nullptr);
+	root = new node(std::vector<node *>(),1,"iso",nullptr,"","","");
 }
 
 Tree::~Tree()
 {
 }
 
-void Tree::Insert(int key, std::string parent_name, std::string child_name, datatypes *type)
+void Tree::Insert(int key, std::string access, std::string status, std::string description, std::string parent_name, std::string child_name, datatypes *type)
 {
-	//keys.erase(keys.begin());
-	Insert(key, parent_name, child_name, type, root);
+	Insert(key, access, status, description, parent_name, child_name, type, root);
 }
 
 void Tree::Show()
@@ -31,7 +30,7 @@ void Tree::SearchName(std::string name)
 	return SearchName(name,root);
 }
 
-void Tree::Insert(int key, std::string parent_name, std::string child_name, datatypes *type, node *leaf)
+void Tree::Insert(int key, std::string access, std::string status, std::string description, std::string parent_name, std::string child_name, datatypes *type, node *leaf)
 {
 	std::vector<node *>::iterator iter = std::find_if(leaf->children.begin(), leaf->children.end(),[&mib = parent_name](node * obj)
 	{ return obj->name == mib;} );
@@ -39,19 +38,19 @@ void Tree::Insert(int key, std::string parent_name, std::string child_name, data
 	if ( iter != leaf->children.end() )
 	{
 		auto index = std::distance(leaf->children.begin(),iter);
-		leaf->children.at(index)->children.push_back(new node(std::vector<node *>(),key,child_name,type));
+		leaf->children.at(index)->children.push_back(new node(std::vector<node *>(), key, child_name, type, access, status, description));
 		return;
 	} 
 	else if (leaf->children.size() > 0)
 	{
 		for (size_t index = 0; index < leaf->children.size(); index++)
 		{
-			Insert(key, parent_name, child_name, type, leaf->children.at(index));
+			Insert(key, access, status, description, parent_name, child_name, type, leaf->children.at(index));
 		}
 	}
 	else if (leaf->name == parent_name)
 	{
-		leaf->children.push_back(new node(std::vector<node *>(),key,child_name,type));
+		leaf->children.push_back(new node(std::vector<node *>(), key, child_name, type, access, status, description));
 	}
 }
 

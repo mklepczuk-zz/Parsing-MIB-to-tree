@@ -11,14 +11,18 @@ struct node{
 	int mib;
 	std::string name;
 	datatypes *type;
-	node(std::vector<node *> children,int mib,std::string name,datatypes *type) : children(children), mib(mib), name(name), type(type){}
+	std::string access;
+	std::string status;
+	std::string description;
+	node(std::vector<node *> children,int mib,std::string name,datatypes *type, std::string access, std::string status, std::string description)
+		: children(children), mib(mib), name(name), type(type), access(access), status(status), description(description) {}
 };
 
 class Tree
 {
 private:
 	node *root, *found;
-	void Insert(int, std::string, std::string, datatypes *,node *);
+	void Insert(int, std::string, std::string, std::string, std::string, std::string, datatypes *,node *);
 	void SearchName(std::string, node *);
 	void Show(node *);
 
@@ -26,7 +30,7 @@ public:
 	Tree();
 	virtual ~Tree();
 
-	void Insert(int, std::string, std::string, datatypes *);
+	void Insert(int, std::string, std::string, std::string, std::string, std::string, datatypes *);
 	void SearchName(std::string);
 	void Show();
 	node *GetFound();

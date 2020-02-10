@@ -55,7 +55,8 @@ void ParserMIB::ParseDataTypes(std::string import,std::vector<datatypes *> *list
 		while (next != end)
 		{
 			std::smatch match = *next;
-			listoftypes->push_back(new datatypes(match.str(1),match.str(2),std::stoi(match.str(3)), match.str(4),match.str(5),std::stoi(match.str(6)),std::stoul(match.str(7))));
+			listoftypes->push_back(new datatypes(match.str(1),match.str(2),std::stoi(match.str(3)), match.str(4),match.str(5),
+				std::stoi(match.str(6)),std::stoul(match.str(7)),std::vector<datatypes *>()));
 			next++;
 		}
 
@@ -63,7 +64,8 @@ void ParserMIB::ParseDataTypes(std::string import,std::vector<datatypes *> *list
 		std::sregex_iterator next2(import.begin(), import.end(), re2);
 		std::sregex_iterator end2;
 		std::smatch match2 = *next2;
-		listoftypes->push_back(new datatypes(match2.str(1),match2.str(2),std::stoi(match2.str(3)), match2.str(4),match2.str(5),0,std::stoi(match2.str(6))));
+		listoftypes->push_back(new datatypes(match2.str(1),match2.str(2),std::stoi(match2.str(3)), match2.str(4),match2.str(5),
+			0,std::stoi(match2.str(6)),std::vector<datatypes *>()));
 
 		std::regex re3("(\\w*)\\s*::=\\s*CHOICE\\s*\\{\\s*internet\\s*(\\w*)");
 		std::sregex_iterator next3(import.begin(), import.end(), re3);
@@ -73,7 +75,7 @@ void ParserMIB::ParseDataTypes(std::string import,std::vector<datatypes *> *list
 			{ return obj->name == type;} );
 		auto index = std::distance(listoftypes->begin(),iter);
 		listoftypes->push_back(new datatypes(match3.str(1),listoftypes->at(index)->visibility,listoftypes->at(index)->id,listoftypes->at(index)->keyWord,
-			listoftypes->at(index)->basicType,listoftypes->at(index)->minValue,listoftypes->at(index)->size));
+			listoftypes->at(index)->basicType,listoftypes->at(index)->minValue,listoftypes->at(index)->size,std::vector<datatypes *>()));
 	}
 
 	if(file == "MIB")
@@ -84,7 +86,7 @@ void ParserMIB::ParseDataTypes(std::string import,std::vector<datatypes *> *list
 		while (next4 != end4)
 		{
 			std::smatch match4 = *next4;
-			listoftypes->push_back(new datatypes(match4.str(1),"CONTEXT-SPECIFIC",4,"UNIVERSAL",match4.str(2),0,255));
+			listoftypes->push_back(new datatypes(match4.str(1),"CONTEXT-SPECIFIC",4,"UNIVERSAL",match4.str(2),0,255,std::vector<datatypes *>()));
 			next4++;
 		}
 	}
@@ -137,7 +139,7 @@ void ParserMIB::ParseIdentifiers(std::string import, std::string file, Tree *nTr
 void ParserMIB::ParseObjects(std::string import, std::vector<datatypes*> *listoftypes, Tree *nTree)
 {
 	std::string s ="(\\w*) OBJECT-TYPE\\n.*SYNTAX  (SEQUENCE OF )?(\\w*\\s*\\w*)(\\{[^\\}]*\\})?( \\(SIZE \\(0\\.\\.255\\)\\))?( \\((\\d*)\\.\\.(\\d*)\\))?";
-	std::string s2 = "\\n.*ACCESS  (\\w*\\-\\w*)\\n.*STATUS  (\\w*)\\n.*DESCRIPTION\\n.*\"([^\"]*)\"\\n.*(\\n.*)?::= \\{ (\\w*) (\\d*)";
+	std::string s2 = "\\n.*ACCESS  (\\w*\\-\\w*)\\n.*STATUS  (\\w*)\\n.*DESCRIPTION\\n.*\"([^\"]*)\"\\n.*([^\"]*)?::= \\{ (\\w*) (\\d*)";
 	std::regex re(s+s2);
 	std::sregex_iterator next(import.begin(), import.end(), re);
 	std::sregex_iterator end;
@@ -147,7 +149,8 @@ void ParserMIB::ParseObjects(std::string import, std::vector<datatypes*> *listof
 		if(match[4].matched != false) //INT O OKREŒLONYCH WARTOŒCIACH
 		{
 			std::regex re2("(\\d+)\\)[^\\,]");
-			std::sregex_iterator next2((match.str(4)).begin(), (match.str(4)).end(), re2);
+			std::string s = match.str(4);
+			std::sregex_iterator next2(s.begin(),s.end(), re2);
 			std::smatch match2 = *next2;
 			std::vector<datatypes *>::iterator iter = std::find_if(listoftypes->begin(), listoftypes->end(),[type = (match.str(3)+match2.str(1))](datatypes * obj)
 			{ return obj->name == type;} );
@@ -158,7 +161,8 @@ void ParserMIB::ParseObjects(std::string import, std::vector<datatypes*> *listof
 			}
 			else
 			{
-				listoftypes->push_back(new datatypes((match.str(3)+match2.str(1)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),1,std::stoul(match2.str(1))));
+				listoftypes->push_back(new datatypes((match.str(3)+match2.str(1)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),
+					1,std::stoul(match2.str(1)),std::vector<datatypes *>()));
 				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->back());
 			}
 		}
@@ -173,13 +177,68 @@ void ParserMIB::ParseObjects(std::string import, std::vector<datatypes*> *listof
 			}
 			else
 			{
-				listoftypes->push_back(new datatypes((match.str(3)+match.str(8)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),std::stoi(match.str(7)),std::stoul(match.str(8))));
+				listoftypes->push_back(new datatypes((match.str(3)+match.str(8)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),
+					std::stoi(match.str(7)),std::stoul(match.str(8)),std::vector<datatypes *>()));
 				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->back());
 			}
 		}
 		else if(match[2].matched != false)  //SEKWENCJE
 		{
-			listoftypes->push_back(new datatypes((match.str(3)+match.str(8)),"",2,"",match.str(3),std::stoi(match.str(7)),std::stoul(match.str(8))));
+			std::regex re3(match.str(3)+" ::=\\n.*([^\\}]*)");
+			std::sregex_iterator next3(import.begin(),import.end(), re3);
+			std::smatch match3 = *next3;
+			s = match3.str(1);
+			std::vector<datatypes *> sequence = std::vector<datatypes *>();
+
+			std::regex re4("(            (\\w*\\s*\\w*)(\\((\\d*)\\.\\.(\\d*)\\))?)");
+			std::sregex_iterator next4(s.begin(),s.end(),re4);
+			std::sregex_iterator end4;
+			while (next4 != end4)
+			{
+				std::smatch match4 = *next4;
+				if(match4[3].matched != false)
+				{
+					std::vector<datatypes *>::iterator iter = std::find_if(listoftypes->begin(), listoftypes->end(),[type = (match4.str(2)+match4.str(5))](datatypes * obj)
+					{ return obj->name == type;} );
+					if ( iter != listoftypes->end() )
+					{
+						auto index = std::distance(listoftypes->begin(),iter);
+						sequence.push_back(listoftypes->at(index));
+					}
+					else
+					{
+						listoftypes->push_back(new datatypes((match4.str(2)+match4.str(5)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match4.str(2),
+						std::stoi(match4.str(4)),std::stoul(match4.str(5)),std::vector<datatypes *>()));
+						sequence.push_back(listoftypes->back());
+					}
+				}
+				else
+				{
+					std::vector<datatypes *>::iterator iter = std::find_if(listoftypes->begin(), listoftypes->end(),[type = match4.str(2)](datatypes * obj)
+					{ return obj->name == type;} );
+					if ( iter != listoftypes->end() )
+					{
+						auto index = std::distance(listoftypes->begin(),iter);
+						sequence.push_back(listoftypes->at(index));
+					}
+					else
+					{
+						std::regex re5("\\w*");
+						std::string temp = match4.str(2);
+						std::sregex_iterator next5(temp.begin(),temp.end(),re5);
+						std::smatch match5 = *next5;
+						std::vector<datatypes *>::iterator iter = std::find_if(listoftypes->begin(), listoftypes->end(),[type = match5.str(0)](datatypes * obj)
+						{ return obj->name == type;} );
+						if ( iter != listoftypes->end() )
+						{
+							auto index = std::distance(listoftypes->begin(),iter);
+							sequence.push_back(listoftypes->at(index));
+						}
+					}
+				}
+				next4++;
+			}
+			listoftypes->push_back(new datatypes(match.str(3),"CONTEXT-SPECIFIC",16,"UNIVERSAL",match.str(3),0,0,sequence));
 			nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->back());
 		}
 		else
@@ -194,9 +253,9 @@ void ParserMIB::ParseObjects(std::string import, std::vector<datatypes*> *listof
 			else
 			{
 				if(match.str(3) == "OBJECT IDENTIFIER")
-					listoftypes->push_back(new datatypes((match.str(3)),"CONTEXT-SPECIFIC",6,"UNIVERSAL",match.str(3),0,255));
+					listoftypes->push_back(new datatypes((match.str(3)),"CONTEXT-SPECIFIC",6,"UNIVERSAL",match.str(3),0,255,std::vector<datatypes *>()));
 				else
-					listoftypes->push_back(new datatypes((match.str(3)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),(-2147483647-1),2147483647));
+					listoftypes->push_back(new datatypes((match.str(3)),"CONTEXT-SPECIFIC",2,"UNIVERSAL",match.str(3),(-2147483647-1),2147483647,std::vector<datatypes *>()));
 				nTree->Insert(std::stoi(match.str(14)),match.str(9),match.str(10),match.str(11),match.str(13),match.str(1),listoftypes->back());
 			}
 		}
